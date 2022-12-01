@@ -1,0 +1,8 @@
+{
+  "name": "advent-of-code",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Werner Dweight <wd@wernerdweight.com>",
+  "license": "MIT",
+  "type": "module"
+}
