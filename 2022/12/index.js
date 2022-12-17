@@ -17,6 +17,7 @@ let highestPosition = 'a'
 let highestDepth = 0
 let startTime = new Date()
 let uniqueVisited = {}
+let shortestVisited = []
 
 const replaceLimits = charCode => charCode === START ? 'a'.charCodeAt(0) : (charCode === END ? 'z'.charCodeAt(0) : charCode)
 
@@ -44,7 +45,7 @@ const solve = (grid, coords, fromDirection, visited) => {
   highestDepth = highestDepth < newVisited.length ? newVisited.length : highestDepth
 
   if (newVisited.length > bestSolution) {
-    console.log(`Already visited more nodes (${newVisited.length}) than the current best solution, terminating branch...`)
+    //console.log(`Already visited more nodes (${newVisited.length}) than the current best solution, terminating branch...`)
     return Infinity
   }
 
@@ -69,13 +70,17 @@ const solve = (grid, coords, fromDirection, visited) => {
     //  }
     //  console.log(chars)
     //}
-    console.log(` ${Math.abs(new Date() - startTime) / 1_000} s | Visited ${totalCounter} nodes, ${Object.keys(uniqueVisited).length} unique | highest so far is ${highestPosition} | depth: highest ${highestDepth}, current ${newVisited.length} | ${solutionCounter} solutions so far | best solution in ${bestSolution} steps`)
+    //console.log(` ${Math.abs(new Date() - startTime) / 1_000} s | Visited ${totalCounter} nodes, ${Object.keys(uniqueVisited).length} unique | highest so far is ${highestPosition} | depth: highest ${highestDepth}, current ${newVisited.length} | ${solutionCounter} solutions so far | best solution in ${bestSolution} steps`)
   }
 
   if (grid[row][col] === END) {
     // reached 'E'
-    console.log(`found E, visited ${newVisited.length} nodes`)
+    //console.log(`found E, visited ${newVisited.length} nodes`)
     solutionCounter++
+    if (bestSolution >= newVisited.length) {
+      bestSolution = newVisited.length
+      shortestVisited = [...newVisited]
+    }
     bestSolution = bestSolution < newVisited.length ? bestSolution : newVisited.length
     return 0
   }
@@ -149,3 +154,11 @@ const steps = solve(grid, startCoords, null, [])
 
 console.log(`Visited ${totalCounter} nodes`)
 console.log(`The shortest path is ${steps} steps long`)
+
+// this is a hack, but I don't have time for this anymore
+const stepsA = grid.reduce((carry, row, index) => {
+  console.log(`Checking for A at row ${index}...`)
+  const steps = solve(grid, [index, 0], null, [])
+  return steps < carry ? steps : carry
+}, Infinity)
+console.log(`The closest A->E distance is ${stepsA} steps long`)
