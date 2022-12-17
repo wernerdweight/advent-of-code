@@ -20,58 +20,63 @@ let uniqueVisited = {}
 
 const replaceLimits = charCode => charCode === START ? 'a'.charCodeAt(0) : (charCode === END ? 'z'.charCodeAt(0) : charCode)
 
-const canGoUp = ([row, col], visited) => row > 0 && !visited.includes(`${row - 1}:${col}`) && (replaceLimits(grid[row - 1][col]) - replaceLimits(grid[row][col]) >= 0)
-const canGoDown = ([row, col], visited) => row < grid.length - 1 && !visited.includes(`${row + 1}:${col}`) && (replaceLimits(grid[row + 1][col]) - replaceLimits(grid[row][col]) >= 0)
-const canGoLeft = ([row, col], visited) => col > 0 && !visited.includes(`${row}:${col - 1}`) && (replaceLimits(grid[row][col - 1]) - replaceLimits(grid[row][col]) >= 0)
-const canGoRight = ([row, col], visited) => col < grid[0].length - 1 && !visited.includes(`${row}:${col + 1}`) && (replaceLimits(grid[row][col + 1]) - replaceLimits(grid[row][col]) >= 0)
+const canGoUp = ([row, col], visited) => row > 0 && !visited.includes(`${row - 1}:${col}`) && (replaceLimits(grid[row - 1][col]) - replaceLimits(grid[row][col]) <= 1)
+const canGoDown = ([row, col], visited) => row < grid.length - 1 && !visited.includes(`${row + 1}:${col}`) && (replaceLimits(grid[row + 1][col]) - replaceLimits(grid[row][col]) <= 1)
+const canGoLeft = ([row, col], visited) => col > 0 && !visited.includes(`${row}:${col - 1}`) && (replaceLimits(grid[row][col - 1]) - replaceLimits(grid[row][col]) <= 1)
+const canGoRight = ([row, col], visited) => col < grid[0].length - 1 && !visited.includes(`${row}:${col + 1}`) && (replaceLimits(grid[row][col + 1]) - replaceLimits(grid[row][col]) <= 1)
 
 const solve = (grid, coords, fromDirection, visited) => {
+  const [row, col] = coords
+  if (distanceMatrix[row][col] <= visited.length) {
+    return Infinity
+  }
+  distanceMatrix[row][col] = visited.length
+  const newVisited = [...visited, `${row}:${col}`]
+
   const paths = {
     up: Infinity,
     down: Infinity,
     left: Infinity,
     right: Infinity
   }
-  const [row, col] = coords
-  visited.push(`${row}:${col}`)
   uniqueVisited[`${row}:${col}`] = true
   highestPosition = highestPosition.charCodeAt(0) < replaceLimits(grid[row][col]) ? String.fromCharCode(replaceLimits(grid[row][col])) : highestPosition
-  highestDepth = highestDepth < visited.length ? visited.length : highestDepth
+  highestDepth = highestDepth < newVisited.length ? newVisited.length : highestDepth
 
-  if (visited.length > bestSolution) {
-    console.log(`Already visited more nodes (${visited.length}) than the current best solution, terminating branch...`)
+  if (newVisited.length > bestSolution) {
+    console.log(`Already visited more nodes (${newVisited.length}) than the current best solution, terminating branch...`)
     return Infinity
   }
 
   // print currently researched branch (every 100,000th)
   totalCounter++
-  if (totalCounter % 100_000 === 0) {
-    console.clear()
-    for (let indexR = 0; indexR < grid.length; indexR++) {
-      let chars = ''
-      for (let indexC = 0; indexC < grid[0].length; indexC++) {
-        let colorStart = ''
-        let colorEnd = ''
-        if (Object.keys(uniqueVisited).includes(`${indexR}:${indexC}`)) {
-          colorStart = '\x1b[35m'
-          colorEnd = '\x1b[0m'
-        }
-        chars += (indexR === startCoords[0] && indexC === startCoords[1]
-          ? '\x1b[33m→\x1b[0m'
-          : (indexR === endCoords[0] && indexC === endCoords[1]
-            ? '\x1b[33m╳\x1b[0m'
-            : `${colorStart}${visited.includes(`${indexR}:${indexC}`) ? '▮' : '▯'}${colorEnd}`))
-      }
-      console.log(chars)
-    }
-    console.log(` ${Math.abs(new Date() - startTime) / 1_000} s | Visited ${totalCounter} nodes, ${Object.keys(uniqueVisited).length} unique | highest so far is ${highestPosition} | depth: highest ${highestDepth}, current ${visited.length} | ${solutionCounter} solutions so far | best solution in ${bestSolution} steps`)
+  if (/*totalCounter % 100_000_000 === 0 || */grid[row][col] === END) {
+    //console.clear()
+    //for (let indexR = 0; indexR < grid.length; indexR++) {
+    //  let chars = ''
+    //  for (let indexC = 0; indexC < grid[0].length; indexC++) {
+    //    let colorStart = ''
+    //    let colorEnd = ''
+    //    if (Object.keys(uniqueVisited).includes(`${indexR}:${indexC}`)) {
+    //      colorStart = '\x1b[35m'
+    //      colorEnd = '\x1b[0m'
+    //    }
+    //    chars += (indexR === startCoords[0] && indexC === startCoords[1]
+    //      ? '\x1b[33m→\x1b[0m'
+    //      : (indexR === endCoords[0] && indexC === endCoords[1]
+    //        ? '\x1b[33m╳\x1b[0m'
+    //        : `${colorStart}${newVisited.includes(`${indexR}:${indexC}`) ? '▮' : '▯'}${colorEnd}`))
+    //  }
+    //  console.log(chars)
+    //}
+    console.log(` ${Math.abs(new Date() - startTime) / 1_000} s | Visited ${totalCounter} nodes, ${Object.keys(uniqueVisited).length} unique | highest so far is ${highestPosition} | depth: highest ${highestDepth}, current ${newVisited.length} | ${solutionCounter} solutions so far | best solution in ${bestSolution} steps`)
   }
 
   if (grid[row][col] === END) {
     // reached 'E'
-    console.log(`found E, visited ${visited.length} nodes`)
+    console.log(`found E, visited ${newVisited.length} nodes`)
     solutionCounter++
-    bestSolution = bestSolution < visited.length ? bestSolution : visited.length
+    bestSolution = bestSolution < newVisited.length ? bestSolution : newVisited.length
     return 0
   }
 
@@ -82,16 +87,16 @@ const solve = (grid, coords, fromDirection, visited) => {
     left: -Infinity
   }
 
-  if (fromDirection !== FROM_RIGHT && canGoRight(coords, visited)) {
+  if (fromDirection !== FROM_RIGHT && canGoRight(coords, newVisited)) {
     priority.right = replaceLimits(grid[row][col + 1]) - replaceLimits(grid[row][col])
   }
-  if (fromDirection !== FROM_ABOVE && canGoUp(coords, visited)) {
+  if (fromDirection !== FROM_ABOVE && canGoUp(coords, newVisited)) {
     priority.up = replaceLimits(grid[row - 1][col]) - replaceLimits(grid[row][col])
   }
-  if (fromDirection !== FROM_BELOW && canGoDown(coords, visited)) {
+  if (fromDirection !== FROM_BELOW && canGoDown(coords, newVisited)) {
     priority.down = replaceLimits(grid[row + 1][col]) - replaceLimits(grid[row][col])
   }
-  if (fromDirection !== FROM_LEFT && canGoLeft(coords, visited)) {
+  if (fromDirection !== FROM_LEFT && canGoLeft(coords, newVisited)) {
     priority.left = replaceLimits(grid[row][col - 1]) - replaceLimits(grid[row][col])
   }
 
@@ -99,16 +104,16 @@ const solve = (grid, coords, fromDirection, visited) => {
   const orderedOperations = Object.keys(priority).filter(key => priority[key] !== -Infinity).sort((keyA, keyB) => priority[keyA] < priority[keyB] ? 1 : -1)
   orderedOperations.forEach(direction => {
     if (direction === 'right') {
-      paths.right = 1 + solve(grid, [row, col + 1], FROM_LEFT, [...visited])
+      paths.right = 1 + solve(grid, [row, col + 1], FROM_LEFT, newVisited)
     }
     if (direction === 'up') {
-      paths.up = 1 + solve(grid, [row - 1, col], FROM_BELOW, [...visited])
+      paths.up = 1 + solve(grid, [row - 1, col], FROM_BELOW, newVisited)
     }
     if (direction === 'down') {
-      paths.down = 1 + solve(grid, [row + 1, col], FROM_ABOVE, [...visited])
+      paths.down = 1 + solve(grid, [row + 1, col], FROM_ABOVE, newVisited)
     }
     if (direction === 'left') {
-      paths.left = 1 + solve(grid, [row, col - 1], FROM_RIGHT, [...visited])
+      paths.left = 1 + solve(grid, [row, col - 1], FROM_RIGHT, newVisited)
     }
   })
   // return shortest path, discard others
@@ -138,8 +143,9 @@ rows.forEach((row, rowIndex) => {
   grid.push(gridRow)
 })
 
+const distanceMatrix = grid.map(row => row.map(() => Infinity))
+
 const steps = solve(grid, startCoords, null, [])
-console.clear()
 
 console.log(`Visited ${totalCounter} nodes`)
 console.log(`The shortest path is ${steps} steps long`)
