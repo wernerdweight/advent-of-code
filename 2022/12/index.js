@@ -20,10 +20,10 @@ let uniqueVisited = {}
 
 const replaceLimits = charCode => charCode === START ? 'a'.charCodeAt(0) : (charCode === END ? 'z'.charCodeAt(0) : charCode)
 
-const canGoUp = ([row, col], visited) => row > 0 && !visited.includes(`${row - 1}:${col}`) && (replaceLimits(grid[row - 1][col]) - replaceLimits(grid[row][col]) <= 1)
-const canGoDown = ([row, col], visited) => row < grid.length - 1 && !visited.includes(`${row + 1}:${col}`) && (replaceLimits(grid[row + 1][col]) - replaceLimits(grid[row][col]) <= 1)
-const canGoLeft = ([row, col], visited) => col > 0 && !visited.includes(`${row}:${col - 1}`) && (replaceLimits(grid[row][col - 1]) - replaceLimits(grid[row][col]) <= 1)
-const canGoRight = ([row, col], visited) => col < grid[0].length - 1 && !visited.includes(`${row}:${col + 1}`) && (replaceLimits(grid[row][col + 1]) - replaceLimits(grid[row][col]) <= 1)
+const canGoUp = ([row, col], visited) => row > 0 && !visited.includes(`${row - 1}:${col}`) && (replaceLimits(grid[row - 1][col]) - replaceLimits(grid[row][col]) >= 0)
+const canGoDown = ([row, col], visited) => row < grid.length - 1 && !visited.includes(`${row + 1}:${col}`) && (replaceLimits(grid[row + 1][col]) - replaceLimits(grid[row][col]) >= 0)
+const canGoLeft = ([row, col], visited) => col > 0 && !visited.includes(`${row}:${col - 1}`) && (replaceLimits(grid[row][col - 1]) - replaceLimits(grid[row][col]) >= 0)
+const canGoRight = ([row, col], visited) => col < grid[0].length - 1 && !visited.includes(`${row}:${col + 1}`) && (replaceLimits(grid[row][col + 1]) - replaceLimits(grid[row][col]) >= 0)
 
 const solve = (grid, coords, fromDirection, visited) => {
   const paths = {
