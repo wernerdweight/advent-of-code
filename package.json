@@ -4,5 +4,8 @@
   "main": "index.js",
   "author": "Werner Dweight <wd@wernerdweight.com>",
   "license": "MIT",
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "sleep": "^6.3.0"
+  }
 }
