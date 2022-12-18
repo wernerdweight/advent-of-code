@@ -41,10 +41,16 @@ const createSingleRowGrid = (sensors, beacons, boundaries, rowIndex) => {
     }
     //console.log(`Sensor ${index} [${sensor}]: covering anything on the selected line ${rowIndex} within the distance of ${distance}...`)
     // check all positions within the distance
-    for (let col = normalizeY(sensor[1]) - distance; col <= normalizeY(sensor[1]) + distance; col++) {
-      if (grid[col] === EMPTY && getMCDistance([normalizeX(rowIndex), col], [normalizeX(sensor[0]), normalizeY(sensor[1])]) <= distance) {
-        grid[col] = COVERED
+    for (let col = normalizeY(sensor[1]) - distance; col <= normalizeY(sensor[1]) + distance;) {
+      const currentDistance = getMCDistance([normalizeX(rowIndex), col], [normalizeX(sensor[0]), normalizeY(sensor[1])])
+      if (grid[col] === EMPTY && currentDistance <= distance) {
+        for (let distanceIndex = 0; distanceIndex <= distance - currentDistance; distanceIndex++) {
+          // adjacent positions within the distance difference will get covered as well
+          grid[col++] = COVERED
+        }
+        continue
       }
+      col++
     }
   })
 
@@ -61,11 +67,15 @@ const createGrid = (sensors, beacons, boundaries) => {
   }
 
   sensors.forEach(([x, y]) => {
-    grid[normalizeX(x)][normalizeY(y)] = SENSOR
+    try {
+      grid[normalizeX(x)][normalizeY(y)] = SENSOR
+    } catch (e) {}
   })
   console.log('All sensors placed')
   beacons.forEach(([x, y]) => {
-    grid[normalizeX(x)][normalizeY(y)] = BEACON
+    try {
+      grid[normalizeX(x)][normalizeY(y)] = BEACON
+    } catch (e) {}
   })
   console.log('All beacons placed')
 
@@ -80,9 +90,19 @@ const createGrid = (sensors, beacons, boundaries) => {
     console.log(`Sensor ${index}: covering anything within the distance of ${distance}...`)
     // check all positions within the distance
     for (let row = normalizeX(sensor[0]) - distance; row <= normalizeX(sensor[0]) + distance; row++) {
-      for (let col = normalizeY(sensor[1]) - distance; col <= normalizeY(sensor[1]) + distance; col++) {
-        if (grid[row][col] === EMPTY && getMCDistance([row, col], [normalizeX(sensor[0]), normalizeY(sensor[1])]) <= distance) {
-          grid[row][col] = COVERED
+      for (let col = normalizeY(sensor[1]) - distance; col <= normalizeY(sensor[1]) + distance;) {
+        try {
+          const currentDistance = getMCDistance([row, col], [normalizeX(sensor[0]), normalizeY(sensor[1])])
+          if (grid[row][col] === EMPTY && currentDistance <= distance) {
+            for (let distanceIndex = 0; distanceIndex <= distance - currentDistance; distanceIndex++) {
+              // adjacent positions within the distance difference will get covered as well
+              grid[row][col++] = COVERED
+            }
+            continue
+          }
+          col++
+        } catch (e) {
+          col++
         }
       }
     }
@@ -147,7 +167,8 @@ rows.forEach(row => {
 
 const MARGIN = 0
 boundaries = [0, 0, 4_000_000, 4_000_000]
-//const grid = createGrid(sensors, beacons, narrowBoundaries)
+//boundaries = [0, 0, 20, 20]
+//const grid = createGrid(sensors, beacons, boundaries)
 //drawImage(grid)
 for (let index = normalizeX(boundaries[0]); index <= normalizeX(boundaries[2]); index++) {
   if (index % 100 === 0) {
