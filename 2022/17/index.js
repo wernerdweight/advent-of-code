@@ -31,7 +31,8 @@ const JET_RIGHT = '>'
 const PAD_LEFT = 2
 const PAD_BOTTOM = 3 + 1
 //const ITERATIONS = 10 // test from the assignment
-const ITERATIONS = 2022
+//const ITERATIONS = 2022
+const ITERATIONS = 1_000_000_000_000
 
 const canGoLeft = rock => {
   const leftMost = rock.reduce((leftMost, element) => element[1] < leftMost[1] ? element : leftMost, [0, Infinity])
@@ -48,10 +49,10 @@ const canGoDown = rock => rock.filter(element => element[0] - 1 <= chamberHorizo
 const fall = iteration => {
   let currentRock = ROCKS[iteration % ROCKS.length]()
   currentRock = currentRock.map(element => [element[0] + Math.max(...chamberHorizon) + PAD_BOTTOM, element[1] + PAD_LEFT])
-  console.log(`Rock ${iteration}: falls from ${JSON.stringify(currentRock)}`)
+  //console.log(`Rock ${iteration}: falls from ${JSON.stringify(currentRock)}`)
   while (true) {
     const currentJet = jetDirections[currentJetIndex++ % jetDirectionsCount]
-    console.log(`Rock ${iteration}: jet ${currentJet}`)
+    //console.log(`Rock ${iteration}: jet ${currentJet}`)
     if (currentJet === JET_LEFT && canGoLeft(currentRock)) {
       currentRock = currentRock.map(element => [element[0], element[1] - 1])
     }
@@ -62,7 +63,9 @@ const fall = iteration => {
       currentRock.forEach(element => {
         chamberHorizon[element[1]] = Math.max(chamberHorizon[element[1]], element[0])
       })
-      console.log(`Rock ${iteration}: done chamberHorizon is ${JSON.stringify(chamberHorizon)}`)
+      if (iteration % 10_000_000 === 0) {
+        console.log(`Rock ${iteration}: done chamberHorizon is ${JSON.stringify(chamberHorizon)}`)
+      }
       break
     }
     currentRock = currentRock.map(element => [element[0] - 1, element[1]])
